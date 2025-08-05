@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Catalog</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <h1>Library Catalog</h1>
+            <div class="auth-links">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}">Profile</a>
+                    <a href="{% url 'signout' %}">Logout</a>
+                {% else %}
+                    <a href="{% url 'signin' %}">Login</a>
+                    <a href="{% url 'signup' %}">Register</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Search and Filter Form -->
+        <form class="search-form" method="GET" action="{% url 'book-list' %}">
+            <input type="text" name="q" placeholder="Search by title or author..." value="{{ query|default:'' }}">
+            <select name="genre">
+                <option value="all">All Genres</option>
+                {% for genre in genres %}
+                    <option value="{{ genre.id }}" {% if genre.id|stringformat:"s" == selected_genre %}selected{% endif %}>
+                        {{ genre.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit">Search</button>
+        </form>
+
+        <!-- Book List Section -->
+        <main class="book-list">
+            {% if book_list %}
+                {% for book in book_list %}
+                    <div class="book-card">
+                        <img src="{{ book.cover_image|default:'https://placehold.co/400x500/cccccc/333333?text=No+Cover' }}" alt="Cover of {{ book.title }}">
+                        <div class="book-card-content">
+                            <h3>{{ book.title }}</h3>
+                            <p class="author">by {{ book.author.first_name }} {{ book.author.last_name }}</p>
+                            <p class="genre">{{ book.genre.name }}</p>
+                            <p class="summary">{{ book.description|truncatechars:100 }}</p>
+                        </div>
+                        <div class="book-card-actions">
+                            <a href="{% url 'book-detail' book.id %}" class="details-link">View Details</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-books-found">No books match your search criteria. Please try again.</p>
+            {% endif %}
+        </main>
+    </div>
+</body>
+</html>
